@@ -1,12 +1,12 @@
 'use client';
 
 import AppLayout from '@/app/AppLayout';
-import InboxContent from '@/app/inbox/Content';
+import TodayContent from '@/app/today/Content';
 
-export default function Home() {
+export default function Today() {
   return (
     <AppLayout>
-      <InboxContent />
+      <TodayContent />
     </AppLayout>
   );
 }
