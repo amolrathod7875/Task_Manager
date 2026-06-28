@@ -3,19 +3,31 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from 'lucide-react';
-import { useTasks } from '@/app/contexts/TaskContext';
 import TaskItem from '@/app/components/TaskItem';
 import EmptyState from '@/app/components/EmptyState';
+import { addTask } from '@/app/actions/tasks';
 
-export default function UpcomingContent() {
-  const { tasks, addTask, updateTask, deleteTask } = useTasks();
+interface Task {
+  id: string;
+  title: string;
+  description: string | null;
+  due_date: string | null;
+  priority: number;
+  project_id: string | null;
+  completed: boolean;
+}
 
+interface UpcomingContentProps {
+  tasks: Task[];
+}
+
+export default function UpcomingContent({ tasks }: UpcomingContentProps) {
   const dates = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() + i);
     const dateStr = date.toISOString().split('T')[0];
-    const dayTasks = tasks.filter(task => task.dueDate === dateStr);
-    
+    const dayTasks = tasks.filter(task => task.due_date === dateStr);
+
     return {
       date,
       dateStr,
@@ -28,32 +40,25 @@ export default function UpcomingContent() {
 
   const [showInputForDate, setShowInputForDate] = useState<string | null>(null);
   const [newTaskInputs, setNewTaskInputs] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAddTask = (dateStr: string) => {
+  const handleAddTask = async (dateStr: string) => {
     const title = newTaskInputs[dateStr]?.trim();
     if (title) {
-      addTask({
-        title,
-        description: '',
-        dueDate: dateStr,
-        priority: 4,
-        projectId: null,
-        completed: false,
-      });
+      setIsSubmitting(true);
+
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', '');
+      formData.append('dueDate', dateStr);
+      formData.append('priority', '4');
+      formData.append('projectId', '');
+
+      await addTask(formData);
       setNewTaskInputs(prev => ({ ...prev, [dateStr]: '' }));
       setShowInputForDate(null);
+      setIsSubmitting(false);
     }
-  };
-
-  const toggleTask = (id: string) => {
-    const task = tasks.find(t => t.id === id);
-    if (task) {
-      updateTask(id, { completed: !task.completed });
-    }
-  };
-
-  const handleDelete = (id: string) => {
-    deleteTask(id);
   };
 
   return (
@@ -74,7 +79,7 @@ export default function UpcomingContent() {
           </div>
         </div>
       </header>
-      
+
       <div className="flex-1 overflow-y-auto p-6">
         {hasAnyTasks ? (
           <div className="space-y-6">
@@ -93,22 +98,17 @@ export default function UpcomingContent() {
                     {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </p>
                 </div>
-                
+
                 {tasks.length > 0 && (
                   <div className="space-y-2 mb-3">
                     <AnimatePresence>
                       {tasks.map(task => (
-                        <TaskItem
-                          key={task.id}
-                          task={task}
-                          onToggle={toggleTask}
-                          onDelete={handleDelete}
-                        />
+                        <TaskItem key={task.id} task={task} />
                       ))}
                     </AnimatePresence>
                   </div>
                 )}
-                
+
                 {showInputForDate === dateStr ? (
                   <div className="flex gap-2">
                     <input
@@ -120,6 +120,7 @@ export default function UpcomingContent() {
                       autoFocus
                       onBlur={() => setTimeout(() => setShowInputForDate(null), 200)}
                       onKeyPress={(e) => e.key === 'Enter' && handleAddTask(dateStr)}
+                      disabled={isSubmitting}
                     />
                   </div>
                 ) : (

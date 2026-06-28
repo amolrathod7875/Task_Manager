@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { login, signUp } from '@/actions/tasks';
+import { login, signUp } from '@/app/actions/tasks';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -67,7 +67,7 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form action={isSignUp ? signUp : login} onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-600 mb-2">
                 Email

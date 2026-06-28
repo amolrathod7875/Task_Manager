@@ -1,34 +1,29 @@
-'use client';
-
 import AppLayout from '@/app/AppLayout';
-import { useTasks } from '@/app/contexts/TaskContext';
+import { getTasks } from '@/app/actions/tasks';
 import { AnimatePresence } from 'framer-motion';
-import { useParams } from 'next/navigation';
 import { Folder } from 'lucide-react';
 import AddTask from '@/app/components/AddTask';
 import TaskItem from '@/app/components/TaskItem';
 import EmptyState from '@/app/components/EmptyState';
 
-export default function ProjectPage() {
-  const params = useParams();
-  const projectId = params.projectId as string;
-  const { tasks, updateTask, deleteTask } = useTasks();
+interface Task {
+  id: string;
+  title: string;
+  description: string | null;
+  due_date: string | null;
+  priority: number;
+  project_id: string | null;
+  completed: boolean;
+}
 
-  const projectTasks = tasks.filter(task => task.projectId === projectId);
-  const projectName = projectId ? projectId.split('-').map(word => 
-    word.charAt(0).toUpperCase() + word.slice(1)
-  ).join(' ') : 'Project';
+export default async function ProjectPage({ params }: { params: { projectId: string } }) {
+  const tasks: Task[] = await getTasks();
+  const projectId = params.projectId;
 
-  const toggleTask = (id: string) => {
-    const task = projectTasks.find(t => t.id === id);
-    if (task) {
-      updateTask(id, { completed: !task.completed });
-    }
-  };
-
-  const handleDelete = (id: string) => {
-    deleteTask(id);
-  };
+  const projectTasks = tasks.filter(task => task.project_id === projectId);
+  const projectName = projectId
+    ? projectId.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+    : 'Project';
 
   return (
     <AppLayout>
@@ -39,7 +34,7 @@ export default function ProjectPage() {
             {projectName}
           </h1>
         </header>
-        
+
         <div className="flex-1 overflow-y-auto p-6">
           <AddTask defaultProject={projectId} />
 
@@ -52,13 +47,8 @@ export default function ProjectPage() {
           ) : (
             <div className="space-y-2">
               <AnimatePresence>
-                {projectTasks.map((task) => (
-                  <TaskItem
-                    key={task.id}
-                    task={task}
-                    onToggle={toggleTask}
-                    onDelete={handleDelete}
-                  />
+                {projectTasks.map(task => (
+                  <TaskItem key={task.id} task={task} />
                 ))}
               </AnimatePresence>
             </div>

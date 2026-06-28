@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Calendar, Flag, Paperclip } from 'lucide-react';
-import { addTask } from '@/actions/tasks';
+import { addTask } from '@/app/actions/tasks';
 
 interface AddTaskProps {
   projectId?: string | null;
@@ -95,7 +95,7 @@ export default function AddTask({ projectId = null, dueDate = null, defaultProje
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
-      <form action={addTask} onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-3">
         <input
           type="text"
           value={title}

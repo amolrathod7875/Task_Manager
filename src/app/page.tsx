@@ -1,12 +1,5 @@
-'use client';
-
-import AppLayout from '@/app/AppLayout';
-import InboxContent from '@/app/inbox/Content';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-  return (
-    <AppLayout>
-      <InboxContent />
-    </AppLayout>
-  );
+  redirect('/inbox');
 }

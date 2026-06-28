@@ -1,5 +1,3 @@
-'use client';
-
 import AppLayout from '@/app/AppLayout';
 import ReportingContent from '@/app/reporting/Content';
 
